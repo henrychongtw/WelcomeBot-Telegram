@@ -204,7 +204,7 @@ class bot_class(telepot_bot):
 							return
 
 						# Finally match /ping
-						if result = pingcommand_match(msg['text']):
+						if pingcommand_match(msg['text']):
 							self.sendMessage(chat_id, '*Current chat_id:* `{}`\n*Your id:* `{}`\n*Bot runtime: {}\nSystem load avg: {}*'.format(
 								chat_id, msg['from']['id'], Log.get_runtime(), getloadavg()),
 								parse_mode='Markdown', reply_to_message_id=msg['message_id'])
