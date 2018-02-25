@@ -57,7 +57,7 @@ class group_cache_class:
 				result = 0
 		else:
 			result = 0
-		self.g[x[0]]={'msg' : x[1],
+		self.g[x[0]]={'msg': x[1],
 			'is_admin':result,
 			'poemable':x[2],
 			'ignore_err':x[3],
@@ -82,7 +82,7 @@ class group_cache_class:
 		except KeyError:
 			Log.error('Can\'t find {} in get()',chat_id)
 			bot.sendMessage(chat_id,'It\'s seems that database broken, please reset welcome message.')
-			self.add((chat_id,None,0,1,1),not_found=True)
+			self.add((chat_id,None,0,1,0),not_found=True)
 			self.__db_add(chat_id)
 			return {'msg':None}
 
