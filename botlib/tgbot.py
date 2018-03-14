@@ -77,8 +77,8 @@ class bot_class(telepot_bot):
 		t.daemon = True
 		t.start()
 		Log.info('Initializing other cache')
-		self.gcache = group_cache_class(bot=self,init=True)
-		self.gcache.load(init=True,syncLock=self.syncLock)
+		self.gcache = group_cache_class(bot=self, init=True)
+		self.gcache.load(init=True, syncLock=self.syncLock)
 		self.pcache = poem_class()
 		self.fail_with_md = 'Markdown configure error, check settings or contact bot administrator if you think you are right'
 

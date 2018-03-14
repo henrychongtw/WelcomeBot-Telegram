@@ -69,7 +69,7 @@ The following libraries are required:
 
 ### Run
 
-After configure, you can using ./start.sh to run this bot
+After configure, you can using `./start.sh` to run this bot
 
 ## Hint
 
