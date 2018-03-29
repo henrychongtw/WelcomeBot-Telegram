@@ -26,7 +26,7 @@ from libpy.MainDatabase import MainDatabase
 admin_type = ('creator', 'administrator')
 flag_name = ('no_welcome', 'no_new_member')
 
-class __base_switch:
+class gc_base_switch:
 	def __init__(self, tuple_attr, base_value=0):
 		self.attr = {tuple_attr[x]:x for x in xrange(1, len(tuple_attr)+1)}
 		self.pri_set = switch_class(base_value)
@@ -90,7 +90,7 @@ class group_cache_class:
 			'poemable': x[2],
 			'ignore_err': x[3],
 			'noblue': x[4],
-			'other': __base_switch(flag_name, x[5])}
+			'other': gc_base_switch(flag_name, x[5])}
 		#self.external_dict[chat_id] = {}
 
 	def __db_add(self, chat_id):
