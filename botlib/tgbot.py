@@ -26,9 +26,9 @@ import re,urllib2
 import libpy.Log as Log
 import telepot.exception
 from libpy.Config import Config
-from threading import Lock,Thread
 from libpy.TgBotLib import telepot_bot
 from base64 import b64encode,b64decode
+from threading import Lock,Thread,Timer
 from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
@@ -240,4 +240,4 @@ class bot_class(telepot_bot):
 						self.external_store.get(chat_id) is not None:
 						delete_target_message(chat_id, self.external_store.get(chat_id), 0).start()
 					self.external_store[chat_id] = self.sendMessage(chat_id, b64decode(result).replace('$name', username_splice_and_fix(msg['new_chat_participant'])),
-						parse_mode='Markdown', disable_web_page_preview=True, reply_to_message_id=msg['message_id'])['message_id']
+						parse_mode='Markdown', disable_web_page_preview=True, reply_to_message_id=msg['message_id']).get('message_id')
