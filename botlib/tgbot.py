@@ -4,6 +4,19 @@
 #
 # This module is part of WelcomeBot-Telegram and is released under
 # the AGPL v3 License: https://www.gnu.org/licenses/agpl-3.0.txt
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 import os
 import time
@@ -20,7 +33,6 @@ from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
 
-
 command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag)(@[a-zA-Z_]*bot)?\s?')
 setcommand_match = re.compile(r'^\/setwelcome(@[a-zA-Z_]*bot)?\s((.|\n)*)$')
 gist_match = re.compile(r'^https:\/\/gist.githubusercontent.com\/.+\/[a-z0-9]{32}\/raw\/[a-z0-9]{40}\/.*$')
@@ -30,19 +42,19 @@ poemcommand_match = re.compile(r'^\/poem(@[a-zA-Z_]*bot)?$')
 pingcommand_match = re.compile(r'^\/ping(@[a-zA-Z_]*bot)?$')
 setflagcommand_match = re.compile(r'^\/setflag(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
 
-content_type_concerned = ['new_chat_member']
-group_type = ['group','supergroup']
-admin_type = ['creator','administrator']
-flag_type = ['poemable','ignore_err','noblue']
+content_type_concerned = ('new_chat_member')
+group_type = ('group', 'supergroup')
+admin_type = ('creator', 'administrator')
+flag_type = ('poemable', 'ignore_err', 'noblue', 'no_welcome', 'no_new_member')
 
-# To delete this assert, please check line 43: os.getloadavg()
+# To delete this assert, please check line 55: os.getloadavg()
 import platform
 assert platform.system() == 'Linux', 'This program must run in Linux-like systems'
 
 def getloadavg():
 	return '{} {} {}'.format(*os.getloadavg())
 
-markdown_symbols = ['_', '*', '~', '#', '^', '&', '`']
+markdown_symbols = (u'_', u'*', u'~', u'#', u'^', u'&', u'`')
 
 def username_splice_and_fix(f):
 	name = '{}'.format(f['first_name'])
@@ -50,52 +62,57 @@ def username_splice_and_fix(f):
 		name += ' {}'.format(f['last_name'])
 	name = name if len(name) <= 20 else name[:20]+'...'
 	for x in markdown_symbols:
-		name.replace( x, '')
+		name.replace(x, u'')
 	return name
 
 class delete_target_message(Thread):
-	def __init__(self, bot, chat_id, message_id):
+	def __init__(self, chat_id, message_id, time_delay=5):
 		Thread.__init__(self)
 		self.daemon = True
-		self.bot = bot
-		self.target = (chat_id,message_id)
+		#self.bot = bot
+		self.target = (chat_id, message_id)
+		self.time_delay = time_delay
 
 	def run(self):
-		time.sleep(5)
+		time.sleep(self.time_delay)
 		try:
-			self.bot.deleteMessage(self.target)
+			bot_class.bot_self.deleteMessage(self.target)
 		except telepot.exception.TelegramError as e:
 			if e[1] == 400:
-				pass
+				# Catch access denied
+				return
+			Log.warn('Catched telepot.exception.TelegramError:{}', repr(e))
+
 
 class bot_class(telepot_bot):
-	def custom_init(self,*args,**kwargs):
-		#self.message_loop(self.onMessage)
+	bot_self = None
+	def custom_init(self, *args, **kwargs):
 		self.syncLock = Lock()
-		self.syncLock.acquire()
-		t = Thread(target=self.__specfunc)
-		t.daemon = True
-		t.start()
-		Log.info('Initializing other cache')
-		self.gcache = group_cache_class(bot=self, init=True)
-		self.gcache.load(init=True, syncLock=self.syncLock)
+		self.external_store = {}
+		with self.syncLock:
+			t = Thread(target=self.__specfunc)
+			t.daemon = True
+			t.start()
+			Log.info('Initializing other cache')
+			self.gcache = group_cache_class(init=self)
+			self.gcache.load()
 		self.pcache = poem_class()
 		self.fail_with_md = 'Markdown configure error, check settings or contact bot administrator if you think you are right'
 
 	def __specfunc(self):
-		self.syncLock.acquire()
-		self.message_loop(self.onMessage)
-		self.syncLock.release()
+		with self.syncLock:
+			self.message_loop(self.onMessage)
+		bot_class.bot_self = self.bot
 
-	def getChatMember(self,*args):
+	def getChatMember(self, *args):
 		return self.bot.getChatMember(*args)
 
-	def onMessage(self,msg):
+	def onMessage(self, msg):
 		content_type, chat_type, chat_id = self.glance(msg)
 
 		# Added process
 		if content_type == 'new_chat_member' and msg['new_chat_participant']['id'] == self.getid():
-			self.gcache.add((chat_id, None, 0, 1, 0))
+			self.gcache.add((chat_id, None, 0, 1, 0, 0))
 			with MainDatabase() as db:
 				try:
 					db.execute("INSERT INTO `welcomemsg` (`group_id`) VALUES (%d)"%chat_id)
@@ -109,7 +126,7 @@ class bot_class(telepot_bot):
 				reply_to_message_id=msg['message_id'])
 			return
 
-		# kicked process
+		# Kicked process
 		elif content_type == 'left_chat_member' and msg['left_chat_member']['id'] == self.getid():
 			self.gcache.delete(chat_id)
 			return
@@ -122,7 +139,7 @@ class bot_class(telepot_bot):
 					'entities'][0]['type'] == 'bot_command' and msg[
 						'text'][0] == '/': # Prevent suchas './sudo'
 					if get_result['noblue']:
-						delete_target_message(self.bot, chat_id, msg['message_id']).start()
+						delete_target_message(chat_id, msg['message_id']).start()
 
 					# Match bot command check
 					if command_match.match(msg['text']):
@@ -144,7 +161,7 @@ class bot_class(telepot_bot):
 							return
 
 						# Other command need admin privilege, check it.
-						if self.getChatMember(chat_id,msg['from']['id'])['status'] not in admin_type:
+						if self.getChatMember(chat_id, msg['from']['id'])['status'] not in admin_type:
 							if not get_result['ignore_err']:
 								self.sendMessage(chat_id, 'Permission Denied.\n你没有权限，快滚',
 									reply_to_message_id=msg['message_id'])
@@ -193,6 +210,10 @@ class bot_class(telepot_bot):
 
 						# Match /setflag command
 						result = setflagcommand_match.match(msg['text'])
+						'''
+							result.group(2) is `flag name',
+							result.group(3) is `flag value'
+						'''
 						if result:
 							if str(result.group(2)) not in flag_type:
 								if not get_result['ignore_err']:
@@ -212,6 +233,11 @@ class bot_class(telepot_bot):
 
 			elif content_type in content_type_concerned:
 				result = self.gcache.get(chat_id)['msg']
+				if self.gcache.get(chat_id)['other']['no_welcome']:
+					delete_target_message(chat_id, msg['message_id'], 20).start()
 				if result:
-					self.sendMessage(chat_id, b64decode(result).replace('$name', username_splice_and_fix(msg['new_chat_participant'])),
-						parse_mode='Markdown', disable_web_page_preview=True, reply_to_message_id=msg['message_id'])
+					if self.gcache.get(chat_id)['other']['no_new_member'] and \
+						self.external_store.get(chat_id) is not None:
+						delete_target_message(chat_id, self.external_store.get(chat_id), 0).start()
+					self.external_store[chat_id] = self.sendMessage(chat_id, b64decode(result).replace('$name', username_splice_and_fix(msg['new_chat_participant'])),
+						parse_mode='Markdown', disable_web_page_preview=True, reply_to_message_id=msg['message_id'])['message_id']
