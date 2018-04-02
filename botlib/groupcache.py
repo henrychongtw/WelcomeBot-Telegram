@@ -147,7 +147,7 @@ class group_cache_class:
 			self.g[x[0]]['other'][x[1]] = x[2]
 			with MainDatabase() as db:
 				db.execute("UPDATE `welcomemsg` set `other` = {} WHERE `group_id` = {}".format(
-					int(self.g[x[0]['other']]), x[0]))
+					int(self.g[x[0]]['other']), x[0]))
 		else:
 			if self.g[x[0]][x[1]] == x[2]:
 				return
