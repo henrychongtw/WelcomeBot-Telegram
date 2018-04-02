@@ -31,9 +31,10 @@ def main():
 	Log.debug(1,'Debug level: {}',Log.get_debug_info()[1])
 	bot_class()
 	Log.info('Bot is now running!')
-	Log.info('Starting BackupSQL daemon')
-	BackupSQL.sql_backup_daemon().start()
-	Log.info('BackupSQL daemon is now running')
+	if Config.git.switch:
+		Log.info('Starting BackupSQL daemon')
+		BackupSQL.sql_backup_daemon().start()
+		Log.info('BackupSQL daemon is now running')
 	while True:
 		time.sleep(30)
 

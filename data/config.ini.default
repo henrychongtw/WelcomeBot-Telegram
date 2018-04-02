@@ -28,6 +28,7 @@ key =
 associated_data =
 
 [git]
+switch = off
 source =
 branch = 
 filename = groupwelcome.sql
