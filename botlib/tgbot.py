@@ -233,10 +233,10 @@ class bot_class(telepot_bot):
 
 			elif content_type in content_type_concerned:
 				result = self.gcache.get(chat_id)['msg']
-				if self.gcache.get(chat_id)['other']['no_welcome']:
+				if self.gcache.get(chat_id)['other']['no_new_member']:
 					delete_target_message(chat_id, msg['message_id'], 20).start()
 				if result:
-					if self.gcache.get(chat_id)['other']['no_new_member'] and \
+					if self.gcache.get(chat_id)['other']['no_welcome'] and \
 						self.external_store.get(chat_id) is not None:
 						delete_target_message(chat_id, self.external_store.get(chat_id), 0).start()
 					self.external_store[chat_id] = self.sendMessage(chat_id, b64decode(result).replace('$name', username_splice_and_fix(msg['new_chat_participant'])),
