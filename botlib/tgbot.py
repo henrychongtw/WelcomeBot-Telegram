@@ -96,7 +96,7 @@ no_new_member = {}
 
 def gen_status_msg(g):
 	result = 'bnVsbA==' if g['msg'] is None else g['msg']
-	return status_gen_string.format(result, g['poemable'], g['ignore_err'], g['other']['no_welcome'], g['other']['no_new_member'])
+	return status_gen_string.format(result, g['poemable'], g['ignore_err'], g['noblue'], g['other']['no_welcome'], g['other']['no_new_member'])
 
 class bot_class(telepot_bot):
 	bot_self = None
