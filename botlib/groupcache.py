@@ -24,11 +24,11 @@ from libpy.datastruct import switch_class
 from libpy.MainDatabase import MainDatabase
 
 admin_type = ('creator', 'administrator')
-flag_name = (u'no_welcome', u'no_new_member')
+flag_name = (u'no_welcome', u'no_new_member', u'no_service_msg')
 
 class gc_base_switch:
 	def __init__(self, tuple_attr, base_value=0):
-		self.attr = {tuple_attr[x-1]:x for x in xrange(1, len(tuple_attr)+1)}
+		self.attr = {tuple_attr[x-1]:x-1 for x in xrange(1, len(tuple_attr)+1)}
 		self.pri_set = switch_class(base_value)
 	def __int__(self):
 		return int(self.pri_set)
@@ -43,7 +43,7 @@ class gc_base_switch:
 class group_cache_class:
 	def __init__(self, **kwargs):
 		self.g = dict()
-		self.external_dict = dict()
+		#self.external_dict = dict()
 		if 'init' in kwargs:
 			self.bot = kwargs['init']
 

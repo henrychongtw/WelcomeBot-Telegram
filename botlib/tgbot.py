@@ -33,13 +33,14 @@ from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
 
-command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag)(@[a-zA-Z_]*bot)?\s?')
+command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status)(@[a-zA-Z_]*bot)?\s?')
 setcommand_match = re.compile(r'^\/setwelcome(@[a-zA-Z_]*bot)?\s((.|\n)*)$')
 gist_match = re.compile(r'^https:\/\/gist.githubusercontent.com\/.+\/[a-z0-9]{32}\/raw\/[a-z0-9]{40}\/.*$')
 clearcommand_match = re.compile(r'^\/clear(@[a-zA-Z_]*bot)?$')
 reloadcommand_match = re.compile(r'^\/reload(@[a-zA-Z_]*bot)?$')
 poemcommand_match = re.compile(r'^\/poem(@[a-zA-Z_]*bot)?$')
 pingcommand_match = re.compile(r'^\/ping(@[a-zA-Z_]*bot)?$')
+statuscommand_match = re.compile(r'\/status(@[a-zA-Z_]*bot)?$')
 setflagcommand_match = re.compile(r'^\/setflag(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
 
 content_type_concerned = ('new_chat_member')
@@ -83,6 +84,19 @@ class delete_target_message(Thread):
 				return
 			Log.warn('Catched telepot.exception.TelegramError:{}', repr(e))
 
+status_gen_string = "".join(
+'''Current welcome message: {welcome}
+Flag status:
+poemable = {poem}
+ignore_err = {err}
+noblue = {nocommand}
+no_welcome = {nowelcome}
+no_new_member = {nonewmember}
+''')
+
+def gen_status_msg(chat_id):
+	result = 'bnVsbA==' if g['msg'] is None else g['msg']
+	return status_gen_string.format(result, g['poemable'], g['ignore_err'], g['no_welcome'], g['no_new_member'])
 
 class bot_class(telepot_bot):
 	bot_self = None
@@ -224,6 +238,10 @@ class bot_class(telepot_bot):
 							self.sendMessage(chat_id, "*Set flag \"%s\" to \"%d\" successfully!*"%(str(result.group(2)), int(result.group(3))),
 								parse_mode='Markdown', reply_to_message_id=msg['message_id'])
 							return
+
+						# Match /status command
+						if statuscommand_match.match(msg['text']):
+							self.sendMessage(chat_id, gen_status_msg(self.gcache.get(chat_id)), reply_to_message_id=msg['message_id'])
 
 						# Finally match /ping
 						if pingcommand_match.match(msg['text']):
