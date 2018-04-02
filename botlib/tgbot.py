@@ -139,7 +139,7 @@ class bot_class(telepot_bot):
 					else:
 						traceback.print_exc()
 						raise e
-			self.sendMessage(chat_id,'Please using /setwelcome to set welcome message',
+			self.sendMessage(chat_id,'Please use /setwelcome to set welcome message',
 				reply_to_message_id=msg['message_id'])
 			return
 
@@ -266,15 +266,15 @@ class bot_class(telepot_bot):
 										parse_mode='Markdown', reply_to_message_id=msg['message_id'])
 								return
 							self.gcache.editflag((chat_id,str(result.group(2)),int(result.group(3))))
-							self.sendMessage(chat_id, "*Set flag \"%s\" to \"%d\" successfully!*"%(str(result.group(2)), int(result.group(3))),
-								parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+							delete_target_message(chat_id, self.sendMessage(chat_id, "*Set flag \"%s\" to \"%d\" successfully!*"%(str(result.group(2)), int(result.group(3))),
+								parse_mode='Markdown', reply_to_message_id=msg['message_id'])['message_id']).start()
 							return
 
 						# Match /status command
 						if statuscommand_match.match(msg['text']):
 							delete_target_message(chat_id, self.sendMessage(chat_id, gen_status_msg(self.gcache.get(chat_id)), reply_to_message_id=msg['message_id'])['message_id']).start()
-							delete_target_message(chat_id, self.sendMessage(chat_id, 'raw welcome:```{}```'.format(repr(self.gcache.get(chat_id)['msg'])),
-								parse_mode='markdown', reply_to_message_id=msg['message_id'])['message_id']).start()
+							#delete_target_message(chat_id, self.sendMessage(chat_id, 'raw welcome:```{}```'.format(repr(self.gcache.get(chat_id)['msg'])),
+							#	parse_mode='markdown', reply_to_message_id=msg['message_id'])['message_id']).start()
 							return
 
 						# Finally match /ping
