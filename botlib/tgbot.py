@@ -155,7 +155,7 @@ class bot_class(telepot_bot):
 			if content_type in content_type_concerned:
 				result = self.gcache.get(chat_id)['msg']
 				if self.gcache.get(chat_id)['other']['no_new_member']:
-					delete_target_message(chat_id, msg['message_id'], 20).start()
+					delete_target_message(chat_id, msg['message_id'], 3).start()
 				if result:
 					if self.gcache.get(chat_id)['other']['no_welcome'] and \
 						self.external_store.get(chat_id) is not None:
