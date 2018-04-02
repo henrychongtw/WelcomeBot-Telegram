@@ -86,6 +86,7 @@ class delete_target_message(Thread):
 
 status_gen_string = "".join(
 '''Current welcome message: {}
+
 Flag status:
 poemable = {}
 ignore_err = {}
@@ -96,7 +97,9 @@ no_new_member = {}
 
 def gen_status_msg(g):
 	result = 'bnVsbA==' if g['msg'] is None else g['msg']
-	return status_gen_string.format(result, g['poemable'], g['ignore_err'], g['noblue'], g['other']['no_welcome'], g['other']['no_new_member'])
+	return status_gen_string.format(b64decode(result), g['poemable'],
+		g['ignore_err'], g['noblue'], g['other']['no_welcome'],
+		g['other']['no_new_member'])
 
 class bot_class(telepot_bot):
 	bot_self = None
@@ -147,7 +150,20 @@ class bot_class(telepot_bot):
 
 		# Main process
 		elif msg['chat']['type'] in group_type:
-			if content_type == 'text':
+
+			# Show welcome message
+			if content_type in content_type_concerned:
+				result = self.gcache.get(chat_id)['msg']
+				if self.gcache.get(chat_id)['other']['no_new_member']:
+					delete_target_message(chat_id, msg['message_id'], 20).start()
+				if result:
+					if self.gcache.get(chat_id)['other']['no_welcome'] and \
+						self.external_store.get(chat_id) is not None:
+						delete_target_message(chat_id, self.external_store.get(chat_id), 0).start()
+					self.external_store[chat_id] = self.sendMessage(chat_id, b64decode(result).replace('$name', username_splice_and_fix(msg['new_chat_participant'])),
+						parse_mode='Markdown', disable_web_page_preview=True, reply_to_message_id=msg['message_id']).get('message_id')
+
+			elif content_type == 'text':
 				get_result = self.gcache.get(chat_id)
 				if 'entities' in msg and msg[
 					'entities'][0]['type'] == 'bot_command' and msg[
@@ -261,14 +277,3 @@ class bot_class(telepot_bot):
 							self.sendMessage(chat_id, '*Current chat_id:* `{}`\n*Your id:* `{}`\n*Bot runtime: {}\nSystem load avg: {}*'.format(
 								chat_id, msg['from']['id'], Log.get_runtime(), getloadavg()),
 								parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-
-			elif content_type in content_type_concerned:
-				result = self.gcache.get(chat_id)['msg']
-				if self.gcache.get(chat_id)['other']['no_new_member']:
-					delete_target_message(chat_id, msg['message_id'], 20).start()
-				if result:
-					if self.gcache.get(chat_id)['other']['no_welcome'] and \
-						self.external_store.get(chat_id) is not None:
-						delete_target_message(chat_id, self.external_store.get(chat_id), 0).start()
-					self.external_store[chat_id] = self.sendMessage(chat_id, b64decode(result).replace('$name', username_splice_and_fix(msg['new_chat_participant'])),
-						parse_mode='Markdown', disable_web_page_preview=True, reply_to_message_id=msg['message_id']).get('message_id')
