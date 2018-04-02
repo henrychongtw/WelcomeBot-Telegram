@@ -140,8 +140,8 @@ class group_cache_class:
 			x structure:
 				(chat_id, flag_string_name, flag_value)
 		'''
-		Log.debug(1, 'x = {}, x in flag_name = {}, flag_name = {}', repr(x), repr(x in flag_name), repr(flag_name))
-		if x in flag_name:
+		#Log.debug(1, 'x = {}, x in flag_name = {}, flag_name = {}', repr(x), repr(x in flag_name), repr(flag_name))
+		if x[1] in flag_name:
 			if self.g[x[0]['other'][x[1]]] == x[2]:
 				return
 			self.g[x[0]['other'][x[1]]] = x[2]
