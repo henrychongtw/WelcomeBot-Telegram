@@ -162,7 +162,7 @@ class bot_class(telepot_bot):
 						if result and msg['from']['id'] == Config.bot.owner:
 							operid = chat_id if result.group(1) is None else result.group(2)
 							self.gcache.delete(operid)
-							self.gcache.add((operid, 0, 1, 0, 0), not_found=True)
+							self.gcache.add((operid, None, 0, 1, 0, 0), not_found=True)
 							self.sendMessage(chat_id, 'Operaction successfully!', reply_to_message_id=msg['message_id'])
 							return
 
