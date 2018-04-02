@@ -33,7 +33,7 @@ from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
 
-command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d)(@[a-zA-Z_]*bot)?\s?')
+command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d|l)(@[a-zA-Z_]*bot)?\s?')
 setcommand_match = re.compile(r'^\/setwelcome(@[a-zA-Z_]*bot)?\s((.|\n)*)$')
 gist_match = re.compile(r'^https:\/\/gist.githubusercontent.com\/.+\/[a-z0-9]{32}\/raw\/[a-z0-9]{40}\/.*$')
 clearcommand_match = re.compile(r'^\/clear(@[a-zA-Z_]*bot)?$')
@@ -85,13 +85,13 @@ class delete_target_message(Thread):
 			Log.warn('Catched telepot.exception.TelegramError:{}', repr(e))
 
 status_gen_string = "".join(
-'''Current welcome message: {welcome}
+'''Current welcome message: {}
 Flag status:
-poemable = {poem}
-ignore_err = {err}
-noblue = {nocommand}
-no_welcome = {nowelcome}
-no_new_member = {nonewmember}
+poemable = {}
+ignore_err = {}
+noblue = {}
+no_welcome = {}
+no_new_member = {}
 ''')
 
 def gen_status_msg(g):
@@ -160,13 +160,15 @@ class bot_class(telepot_bot):
 
 						result = re.match(r'^\/d( (-?\d+))?$', msg['text'])
 						if result and msg['from']['id'] == Config.bot.owner:
-							if result.group(1) is None:
-								self.gcache.delete(chat_id)
-								self.bot.leaveChat(chat_id)
-								return
-							self.gcache.delete(result.group(2))
-							self.gcache.add((result.group(2), 0, 1, 0, 0), not_found=True)
+							operid = chat_id if result.group(1) is None else result.group(2)
+							self.gcache.delete(operid)
+							self.gcache.add((operid, 0, 1, 0, 0), not_found=True)
 							self.sendMessage(chat_id, 'Operaction successfully!', reply_to_message_id=msg['message_id'])
+							return
+
+						result = re.match(r'^\/l$', msg['text'])
+						if result and msg['from']['id'] == Config.bot.owner:
+							self.bot.leaveChat(chat_id)
 							return
 
 						# Match /poem command
