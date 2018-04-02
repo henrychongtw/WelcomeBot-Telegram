@@ -139,7 +139,7 @@ class bot_class(telepot_bot):
 					else:
 						traceback.print_exc()
 						raise e
-			self.sendMessage(chat_id,'Please using /setwelcome to setting welcome message',
+			self.sendMessage(chat_id,'Please using /setwelcome to set welcome message',
 				reply_to_message_id=msg['message_id'])
 			return
 
