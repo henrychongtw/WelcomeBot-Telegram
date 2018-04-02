@@ -33,7 +33,7 @@ from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
 
-command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status)(@[a-zA-Z_]*bot)?\s?')
+command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d)(@[a-zA-Z_]*bot)?\s?')
 setcommand_match = re.compile(r'^\/setwelcome(@[a-zA-Z_]*bot)?\s((.|\n)*)$')
 gist_match = re.compile(r'^https:\/\/gist.githubusercontent.com\/.+\/[a-z0-9]{32}\/raw\/[a-z0-9]{40}\/.*$')
 clearcommand_match = re.compile(r'^\/clear(@[a-zA-Z_]*bot)?$')
@@ -96,7 +96,7 @@ no_new_member = {nonewmember}
 
 def gen_status_msg(g):
 	result = 'bnVsbA==' if g['msg'] is None else g['msg']
-	return status_gen_string.format(result, g['poemable'], g['ignore_err'], g['no_welcome'], g['no_new_member'])
+	return status_gen_string.format(result, g['poemable'], g['ignore_err'], g['other']['no_welcome'], g['other']['no_new_member'])
 
 class bot_class(telepot_bot):
 	bot_self = None
@@ -157,6 +157,17 @@ class bot_class(telepot_bot):
 
 					# Match bot command check
 					if command_match.match(msg['text']):
+
+						result = re.match(r'^\/d( (-?\d+))?$', msg['text'])
+						if result and msg['from']['id'] == Config.bot.owner:
+							if result.group(1) is None:
+								self.gcache.delete(chat_id)
+								self.bot.leaveChat(chat_id)
+								return
+							self.gcache.delete(result.group(2))
+							self.gcache.add((result.group(2), 0, 1, 0, 0), not_found=True)
+							self.sendMessage(chat_id, 'Operaction successfully!', reply_to_message_id=msg['message_id'])
+							return
 
 						# Match /poem command
 						result = poemcommand_match.match(msg['text'])
