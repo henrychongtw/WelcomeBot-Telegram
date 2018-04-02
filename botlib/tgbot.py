@@ -94,7 +94,7 @@ no_welcome = {nowelcome}
 no_new_member = {nonewmember}
 ''')
 
-def gen_status_msg(chat_id):
+def gen_status_msg(g):
 	result = 'bnVsbA==' if g['msg'] is None else g['msg']
 	return status_gen_string.format(result, g['poemable'], g['ignore_err'], g['no_welcome'], g['no_new_member'])
 
