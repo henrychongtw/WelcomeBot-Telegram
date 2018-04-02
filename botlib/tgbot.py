@@ -272,9 +272,9 @@ class bot_class(telepot_bot):
 
 						# Match /status command
 						if statuscommand_match.match(msg['text']):
-							delete_target_message(chat_id, self.sendMessage(chat_id, gen_status_msg(self.gcache.get(chat_id)), reply_to_message_id=msg['message_id'])).start()
+							delete_target_message(chat_id, self.sendMessage(chat_id, gen_status_msg(self.gcache.get(chat_id)), reply_to_message_id=msg['message_id'])['message_id']).start()
 							delete_target_message(chat_id, self.sendMessage(chat_id, 'raw welcome:```{}```'.format(repr(self.gcache.get(chat_id)['msg'])),
-								parse_mode='markdown', reply_to_message_id=msg['message_id'])).start()
+								parse_mode='markdown', reply_to_message_id=msg['message_id'])['message_id']).start()
 							return
 
 						# Finally match /ping
