@@ -24,7 +24,7 @@ from libpy.datastruct import switch_class
 from libpy.MainDatabase import MainDatabase
 
 admin_type = ('creator', 'administrator')
-flag_name = ('no_welcome', 'no_new_member')
+flag_name = (u'no_welcome', u'no_new_member')
 
 class gc_base_switch:
 	def __init__(self, tuple_attr, base_value=0):
@@ -142,7 +142,7 @@ class group_cache_class:
 		'''
 		if x in flag_name:
 			if self.g[x[0]['other'][x[1]]] == x[2]:
-				returnd
+				return
 			self.g[x[0]['other'][x[1]]] = x[2]
 			with MainDatabase() as db:
 				db.execute("UPDATE `welcomemsg` set `other` = {} WHERE `group_id` = {}".format(
