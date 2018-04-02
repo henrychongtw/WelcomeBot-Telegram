@@ -142,9 +142,9 @@ class group_cache_class:
 		'''
 		#Log.debug(1, 'x = {}, x in flag_name = {}, flag_name = {}', repr(x), repr(x in flag_name), repr(flag_name))
 		if x[1] in flag_name:
-			if self.g[x[0]['other'][x[1]]] == x[2]:
+			if self.g[x[0]]['other'][x[1]] == x[2]:
 				return
-			self.g[x[0]['other'][x[1]]] = x[2]
+			self.g[x[0]]['other'][x[1]] = x[2]
 			with MainDatabase() as db:
 				db.execute("UPDATE `welcomemsg` set `other` = {} WHERE `group_id` = {}".format(
 					int(self.g[x[0]['other']]), x[0]))
