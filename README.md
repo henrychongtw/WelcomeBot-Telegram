@@ -34,6 +34,7 @@ ignore_err | Show ~~rude~~ message to no privilege member who using bot command 
 noblue | While bot is admin, it will delete bot command after 5 seconds (need delete privilege) | False 
 no_new_member | Bot will auto delete \`Joined group' message (system genereted) (need delete privilege) | False
 no_welcome | Bot will auto delete previous welcome message | False
+no_service_msg | Bot will auto delete service message | False
 
 ### Example
 
