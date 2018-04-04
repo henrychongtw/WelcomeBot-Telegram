@@ -170,7 +170,7 @@ class bot_class(telepot_bot):
 				try:
 					EntryCheck = 'entities' in msg and \
 						msg['entities'][0]['type'] == 'bot_command' and \
-							msg['text'][0] == '/' and msg['text'][:4] != '/prpr' # Prevent suchas './sudo'
+							msg['text'][0] == '/' and msg['text'][:5] != '/prpr' # Prevent suchas './sudo'
 				except IndexError:
 					EntryCheck = False
 					Log.warn('Catched IndexError, msg={}', repr(msg))
