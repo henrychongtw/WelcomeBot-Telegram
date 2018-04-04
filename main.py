@@ -43,7 +43,7 @@ def init():
 	sys.setdefaultencoding('utf8')
 
 if __name__ == '__main__':
-	if len(sys.argv) == 2 :
+	if len(sys.argv) == 2:
 		if sys.argv[1] == '--restore':
 			BackupSQL.restore_sql()
 		if sys.argv[1] == '--without-backup':

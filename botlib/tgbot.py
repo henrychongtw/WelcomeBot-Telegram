@@ -167,9 +167,15 @@ class bot_class(telepot_bot):
 
 			elif content_type == 'text':
 				get_result = self.gcache.get(chat_id)
-				if 'entities' in msg and msg[
-					'entities'][0]['type'] == 'bot_command' and msg[
-						'text'][0] == '/' and msg['text'][:4] != '/prpr': # Prevent suchas './sudo'
+				try:
+					EntryCheck = 'entities' in msg and \
+						msg['entities'][0]['type'] == 'bot_command' and \
+							msg['text'][0] == '/' and msg['text'][:4] != '/prpr' # Prevent suchas './sudo'
+				except IndexError:
+					EntryCheck = False
+					Log.warn('Catched IndexError, msg={}', repr(msg))
+
+				if EntryCheck:
 					if get_result['noblue']:
 						delete_target_message(chat_id, msg['message_id']).start()
 
