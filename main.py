@@ -43,8 +43,13 @@ def init():
 	sys.setdefaultencoding('utf8')
 
 if __name__ == '__main__':
-	if len(sys.argv) > 1 and sys.argv[1] == '--restore':
-		BackupSQL.restore_sql()
+	if len(sys.argv) == 2 :
+		if sys.argv[1] == '--restore':
+			BackupSQL.restore_sql()
+		if sys.argv[1] == '--without-backup':
+			Config.git.switch = False
+			init()
+			main()
 	else:
 		init()
 		main()
