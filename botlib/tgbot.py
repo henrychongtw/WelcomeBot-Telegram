@@ -53,7 +53,7 @@ admin_type = ('creator', 'administrator')
 flag_type = ('poemable', 'ignore_err', 'noblue', 'no_welcome', 'no_new_member', 'no_service_msg')
 service_msg_type = ('new_chat_title', 'new_chat_photo', 'delete_chat_photo', 'pinned_message')
 
-# To delete this assert, please check line 55: os.getloadavg()
+# To delete this assert, please check line 61: os.getloadavg()
 import platform
 assert platform.system() == 'Linux', 'This program must run in Linux-like systems'
 
@@ -98,6 +98,7 @@ ignore_err = {}
 noblue = {}
 no_welcome = {}
 no_new_member = {}
+no_service_msg = {}
 except_command = {}
 ''')
 
@@ -110,7 +111,7 @@ def gen_status_msg(g):
 	result = 'bnVsbA==' if g['msg'] is None else g['msg']
 	return status_gen_string.format(b64decode(result), g['poemable'],
 		g['ignore_err'], g['noblue'], g['other']['no_welcome'],
-		g['other']['no_new_member'], repr(g['except']))
+		g['other']['no_new_member'], g['other']['no_service_msg'], repr(g['except']))
 
 class bot_class(telepot_bot):
 	bot_self = None

@@ -46,10 +46,8 @@ if __name__ == '__main__':
 	if len(sys.argv) == 2:
 		if sys.argv[1] == '--restore':
 			BackupSQL.restore_sql()
-		if sys.argv[1] == '--without-backup':
+			return
+		elif sys.argv[1] == '--without-backup':
 			Config.git.switch = False
-			init()
-			main()
-	else:
-		init()
-		main()
+	init()
+	main()
