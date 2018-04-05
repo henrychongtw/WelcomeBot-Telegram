@@ -302,15 +302,15 @@ class bot_class(telepot_bot):
 						if result:
 							if result.group(1) == 'd':
 								if self.gcache.except_(chat_id, result.group(3), True):
-									sendMessage_and_delete(chat_id, 'Delete except command success', kwargs={reply_to_message_id: msg['message_id']})
+									sendMessage_and_delete(chat_id, 'Delete except command success', kwargs={'reply_to_message_id': msg['message_id']})
 								else:
 									sendMessage_and_delete(chat_id, 'Delete except command fail. (Is command in except list? Tips: try using /status to see more)', 
-										kwargs={reply_to_message_id: msg['message_id']})
+										kwargs={'reply_to_message_id': msg['message_id']})
 							else:
 								if self.gcache.except_(chat_id, result.group(3)):
-									sendMessage_and_delete(chat_id, 'Add except command success', kwargs={reply_to_message_id: msg['message_id']})
+									sendMessage_and_delete(chat_id, 'Add except command success', kwargs={'reply_to_message_id': msg['message_id']})
 								else:
-									sendMessage_and_delete(chat_id, 'Add except command fail with excpet list too long.', kwargs={reply_to_message_id: msg['message_id']})
+									sendMessage_and_delete(chat_id, 'Add except command fail with excpet list too long.', kwargs={'reply_to_message_id': msg['message_id']})
 							return
 
 						# Match /status command
