@@ -181,14 +181,14 @@ class bot_class(telepot_bot):
 				result = botcommand_match.match(msg['text'])
 				try:
 					EntryCheck = 'entities' in msg and len(msg['entities']) > 0 and \
-						msg['entities'][0]['type'] == 'bot_command' and \
-							(result and result.group(1) not in self.gcache.get(chat_id)['except'])
+						msg['entities'][0]['type'] == 'bot_command'
 				except IndexError:
 					EntryCheck = False
 					Log.warn('Catched IndexError, msg={}', repr(msg))
 
 				if EntryCheck:
-					if get_result['noblue']:
+					if get_result['noblue'] and \
+						(result and result.group(1) not in self.gcache.get(chat_id)['except']):
 						delete_target_message(chat_id, msg['message_id']).start()
 
 					# Match bot command check
