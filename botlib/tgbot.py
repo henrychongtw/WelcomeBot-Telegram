@@ -319,9 +319,9 @@ class bot_class(telepot_bot):
 
 						# Finally match /ping
 						if pingcommand_match.match(msg['text']):
-							self.sendMessage(chat_id, '*Current chat_id:* `{}`\n*Your id:* `{}`\n*Bot runtime: {}\nSystem load avg: {}*'.format(
+							delete_target_message(chat_id, self.sendMessage(chat_id, '*Current chat_id:* `{}`\n*Your id:* `{}`\n*Bot runtime: {}\nSystem load avg: {}*'.format(
 								chat_id, msg['from']['id'], Log.get_runtime(), getloadavg()),
-								parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+								parse_mode='Markdown', reply_to_message_id=msg['message_id'])['message_id'], 10)
 
 			elif content_type in service_msg_type and self.gcache.get(char_id)['other']['no_service_msg']:
 				delete_target_message(chat_id, msg['message_id'], 0).start()
