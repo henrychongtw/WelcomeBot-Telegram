@@ -182,7 +182,7 @@ class bot_class(telepot_bot):
 				try:
 					EntryCheck = 'entities' in msg and len(msg['entities']) > 0 and \
 						msg['entities'][0]['type'] == 'bot_command' and \
-							 result.group(1) not in self.gcache.get(chat_id)['except']
+							(result and result.group(1) not in self.gcache.get(chat_id)['except'])
 				except IndexError:
 					EntryCheck = False
 					Log.warn('Catched IndexError, msg={}', repr(msg))
