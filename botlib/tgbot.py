@@ -26,6 +26,7 @@ import re,urllib2
 import libpy.Log as Log
 import telepot.exception
 from libpy.Config import Config
+from libpy.DiskCache import DiskCache
 from libpy.TgBotLib import telepot_bot
 from base64 import b64encode,b64decode
 from threading import Lock,Thread,Timer
@@ -33,7 +34,7 @@ from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
 
-command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d|l|s)(@[a-zA-Z_]*bot)?\s?')
+command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d|l|s|except)(@[a-zA-Z_]*bot)?\s?')
 setcommand_match = re.compile(r'^\/setwelcome(@[a-zA-Z_]*bot)?\s((.|\n)*)$')
 gist_match = re.compile(r'^https:\/\/gist.githubusercontent.com\/.+\/[a-z0-9]{32}\/raw\/[a-z0-9]{40}\/.*$')
 clearcommand_match = re.compile(r'^\/clear(@[a-zA-Z_]*bot)?$')
@@ -43,6 +44,7 @@ pingcommand_match = re.compile(r'^\/ping(@[a-zA-Z_]*bot)?$')
 statuscommand_match = re.compile(r'\/status(@[a-zA-Z_]*bot)?$')
 setflagcommand_match = re.compile(r'^\/setflag(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
 setflag2command_match = re.compile(r'^\/s(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
+botcommand_match = re.compile(r'^\/([a-zA-Z]+)(@[a-zA-Z_]+)?$')
 
 content_type_concerned = ('new_chat_member')
 group_type = ('group', 'supergroup')
@@ -95,19 +97,21 @@ ignore_err = {}
 noblue = {}
 no_welcome = {}
 no_new_member = {}
+except_command = {}
 ''')
 
 def gen_status_msg(g):
 	result = 'bnVsbA==' if g['msg'] is None else g['msg']
 	return status_gen_string.format(b64decode(result), g['poemable'],
 		g['ignore_err'], g['noblue'], g['other']['no_welcome'],
-		g['other']['no_new_member'])
+		g['other']['no_new_member'], repr(g['except']))
 
 class bot_class(telepot_bot):
 	bot_self = None
 	def custom_init(self, *args, **kwargs):
 		self.syncLock = Lock()
-		self.external_store = {}
+		self.cache = DiskCache('data/id_cache', default_return_type=dict())
+		self.external_store = self.cache.read_without_except()
 		with self.syncLock:
 			t = Thread(target=self.__specfunc)
 			t.daemon = True
@@ -131,7 +135,7 @@ class bot_class(telepot_bot):
 
 		# Added process
 		if content_type == 'new_chat_member' and msg['new_chat_participant']['id'] == self.getid():
-			self.gcache.add((chat_id, None, 0, 1, 0, 0))
+			self.gcache.add((chat_id, None, 0, 1, 0, 0, []))
 			with MainDatabase() as db:
 				try:
 					db.execute("INSERT INTO `welcomemsg` (`group_id`) VALUES (%d)"%chat_id)
@@ -164,13 +168,15 @@ class bot_class(telepot_bot):
 						delete_target_message(chat_id, self.external_store.get(chat_id), 0).start()
 					self.external_store[chat_id] = self.sendMessage(chat_id, b64decode(result).replace('$name', username_splice_and_fix(msg['new_chat_participant'])),
 						parse_mode='Markdown', disable_web_page_preview=True, reply_to_message_id=msg['message_id']).get('message_id')
+					self.cache.write(self.external_store)
 
-			elif content_type == 'text':
+			elif content_type == 'text' and msg['text'][0] == '/':
 				get_result = self.gcache.get(chat_id)
+				result = botcommand_match.match(msg['text'])
 				try:
-					EntryCheck = 'entities' in msg and \
+					EntryCheck = 'entities' in msg and len(msg['entities']) > 0 and \
 						msg['entities'][0]['type'] == 'bot_command' and \
-							msg['text'][0] == '/' and msg['text'][:5] != '/prpr' # Prevent suchas './sudo'
+							 result.group(1) not in self.gcache.get(chat_id)['except']
 				except IndexError:
 					EntryCheck = False
 					Log.warn('Catched IndexError, msg={}', repr(msg))
@@ -187,7 +193,7 @@ class bot_class(telepot_bot):
 							if result:
 								operid = chat_id if result.group(1) is None else result.group(2)
 								self.gcache.delete(operid)
-								self.gcache.add((operid, None, 0, 1, 0, 0), not_found=True)
+								self.gcache.add((operid, None, 0, 1, 0, 0, []), not_found=True)
 								delete_target_message(chat_id,
 									self.sendMessage(chat_id, 'Operaction completed!', 
 										reply_to_message_id=msg['message_id'])['message_id']).start()
@@ -281,7 +287,7 @@ class bot_class(telepot_bot):
 									self.sendMessage(chat_id, "*Error*: Flag \"%s\" not exist"%str(result.group(2)),
 										parse_mode='Markdown', reply_to_message_id=msg['message_id'])
 								return
-							self.gcache.editflag((chat_id,str(result.group(2)),int(result.group(3))))
+							self.gcache.editflag((chat_id, str(result.group(2)), int(result.group(3))))
 							delete_target_message(chat_id, self.sendMessage(chat_id, "*Set flag \"%s\" to \"%d\" success!*"%(str(result.group(2)), int(result.group(3))),
 								parse_mode='Markdown', reply_to_message_id=msg['message_id'])['message_id']).start()
 							return
@@ -289,8 +295,6 @@ class bot_class(telepot_bot):
 						# Match /status command
 						if statuscommand_match.match(msg['text']):
 							delete_target_message(chat_id, self.sendMessage(chat_id, gen_status_msg(self.gcache.get(chat_id)), reply_to_message_id=msg['message_id'])['message_id']).start()
-							#delete_target_message(chat_id, self.sendMessage(chat_id, 'raw welcome:```{}```'.format(repr(self.gcache.get(chat_id)['msg'])),
-							#	parse_mode='markdown', reply_to_message_id=msg['message_id'])['message_id']).start()
 							return
 
 						# Finally match /ping

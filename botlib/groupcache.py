@@ -22,6 +22,7 @@ import telepot
 import libpy.Log as Log
 from libpy.datastruct import switch_class
 from libpy.MainDatabase import MainDatabase
+from base64 import b64decode, b64encode
 
 admin_type = ('creator', 'administrator')
 flag_name = (u'no_welcome', u'no_new_member', u'no_service_msg')
@@ -52,7 +53,6 @@ class group_cache_class:
 		self.__init__()
 		with MainDatabase() as db:
 			result = db.query("SELECT * FROM `welcomemsg`")
-			Log.debug(1, 'in group_cache_class.load(): [exp(not result) = {}]',not result)
 		for x in result:
 			self.add(x)
 		#if init:
@@ -90,8 +90,8 @@ class group_cache_class:
 			'poemable': x[2],
 			'ignore_err': x[3],
 			'noblue': x[4],
-			'other': gc_base_switch(flag_name, x[5])}
-		#self.external_dict[chat_id] = {}
+			'other': gc_base_switch(flag_name, x[5])
+			'except': eval(b64decode(x[6]))}
 
 	def __db_add(self, chat_id):
 		with MainDatabase() as db:
@@ -111,13 +111,23 @@ class group_cache_class:
 			return self.g[chat_id]
 		except KeyError:
 			Log.error('Can\'t find {} in get()',chat_id)
-			self.add((chat_id, None, 0, 1, 0, 0), not_found=True)
+			self.add((chat_id, None, 0, 1, 0, 0, []), not_found=True)
 			self.__db_add(chat_id)
 			self.bot.sendMessage(chat_id, 'It\'s seems that database broken, please reset welcome message.')
 			return {'msg':None}
 
-	#def request_external_store(self, chat_id):
-		#return self.external_dict[chat_id]
+	def except_(self,chat_id, command, is_del=False):
+		if is_del:
+			self.g[chat_id]['except'].remove(command)
+		else:
+			self.g[chat_id]['except'].append(command)
+			if len(b64encode(repr(self.g[chat_id]['execept']))) > 498:
+				self.g[chat_id]['except'].remove(command)
+				return False
+			self.g[chat_id]['except'] = list(set(self.g[chat_id]['except']))
+		with MainDatabase() as db:
+			db.execute("UPDATE `welcomemsg` SET `except` = '{}' WHERE `group_id` = {}".format(self.g[chat_id]['except'], chat_id))
+		return True
 
 	def __db_del(self, chat_id):
 		with MainDatabase() as db:
@@ -129,7 +139,7 @@ class group_cache_class:
 	def edit(self, x):
 		with MainDatabase() as db:
 			if x[1]:
-				db.execute("UPDATE `welcomemsg` SET `msg` = '%s' WHERE `group_id` = %d"%(x[1],x[0]))
+				db.execute("UPDATE `welcomemsg` SET `msg` = '%s' WHERE `group_id` = %d"%(x[1], x[0]))
 			else:
 				db.execute("UPDATE `welcomemsg` SET `msg` = NULL WHERE `group_id` = %d"%x[0])
 		self.g[x[0]]['msg'] = x[1]
