@@ -90,7 +90,7 @@ class group_cache_class:
 			'poemable': x[2],
 			'ignore_err': x[3],
 			'noblue': x[4],
-			'other': gc_base_switch(flag_name, x[5])
+			'other': gc_base_switch(flag_name, x[5]),
 			'except': eval(b64decode(x[6]))}
 
 	def __db_add(self, chat_id):
