@@ -101,8 +101,8 @@ no_new_member = {}
 except_command = {}
 ''')
 
-def sendMessage_and_delete(chat_id, msg, timeout=5, *args, **kwargs):
-	msgid = bot_class.bot_self.sendMessage(chat_id, msg.format(*args), kwargs=kwargs)['message_id']
+def sendMessage_and_delete(chat_id, msg, reply_to, timeout=5, *args,):
+	msgid = bot_class.bot_self.sendMessage(chat_id, msg.format(*args), reply_to_message_id=reply_to)['message_id']
 	delete_target_message(chat_id, msgid, timeout).start()
 	del msgid
 
@@ -302,15 +302,14 @@ class bot_class(telepot_bot):
 						if result:
 							if result.group(1) == 'd':
 								if self.gcache.except_(chat_id, result.group(3), True):
-									sendMessage_and_delete(chat_id, 'Delete except command success', kwargs={'reply_to_message_id': msg['message_id']})
+									sendMessage_and_delete(chat_id, 'Delete except command success', msg['message_id'])
 								else:
-									sendMessage_and_delete(chat_id, 'Delete except command fail. (Is command in except list? Tips: try using /status to see more)', 
-										kwargs={'reply_to_message_id': msg['message_id']})
+									sendMessage_and_delete(chat_id, 'Delete except command fail. (Is command in except list? Tips: try using /status to see more)', msg['message_id'])
 							else:
 								if self.gcache.except_(chat_id, result.group(3)):
-									sendMessage_and_delete(chat_id, 'Add except command success', kwargs={'reply_to_message_id': msg['message_id']})
+									sendMessage_and_delete(chat_id, 'Add except command success', msg['message_id'])
 								else:
-									sendMessage_and_delete(chat_id, 'Add except command fail with excpet list too long.', kwargs={'reply_to_message_id': msg['message_id']})
+									sendMessage_and_delete(chat_id, 'Add except command fail with excpet list too long.', msg['message_id'])
 							return
 
 						# Match /status command
