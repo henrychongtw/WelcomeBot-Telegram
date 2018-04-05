@@ -118,7 +118,10 @@ class group_cache_class:
 
 	def except_(self,chat_id, command, is_del=False):
 		if is_del:
-			self.g[chat_id]['except'].remove(command)
+			try:
+				self.g[chat_id]['except'].remove(command)
+			except ValueError:
+				return False
 		else:
 			self.g[chat_id]['except'].append(command)
 			if len(b64encode(repr(self.g[chat_id]['execept']))) > 498:

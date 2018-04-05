@@ -34,7 +34,7 @@ from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
 
-command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d|l|s|except)(@[a-zA-Z_]*bot)?\s?')
+command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d|l|s|except(d|a))(@[a-zA-Z_]*bot)?\s?')
 setcommand_match = re.compile(r'^\/setwelcome(@[a-zA-Z_]*bot)?\s((.|\n)*)$')
 gist_match = re.compile(r'^https:\/\/gist.githubusercontent.com\/.+\/[a-z0-9]{32}\/raw\/[a-z0-9]{40}\/.*$')
 clearcommand_match = re.compile(r'^\/clear(@[a-zA-Z_]*bot)?$')
@@ -45,6 +45,7 @@ statuscommand_match = re.compile(r'\/status(@[a-zA-Z_]*bot)?$')
 setflagcommand_match = re.compile(r'^\/setflag(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
 setflag2command_match = re.compile(r'^\/s(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
 botcommand_match = re.compile(r'^\/([a-zA-Z]+)(@[a-zA-Z_]+)?$')
+exceptcommand_match = re.compile(r'^\/except(d|a)(@[a-zA-Z_]*bot)?\s(.*)$')
 
 content_type_concerned = ('new_chat_member')
 group_type = ('group', 'supergroup')
@@ -99,6 +100,11 @@ no_welcome = {}
 no_new_member = {}
 except_command = {}
 ''')
+
+def sendMessage_and_delete(chat_id, msg, timeout=5, *args, **kwargs):
+	msgid = bot_class.bot_self.sendMessage(chat_id, msg.format(*args), **kwargs)['message_id']
+	delete_target_message(chat_id, msgid, timeout)
+	del msgid
 
 def gen_status_msg(g):
 	result = 'bnVsbA==' if g['msg'] is None else g['msg']
@@ -290,6 +296,20 @@ class bot_class(telepot_bot):
 							self.gcache.editflag((chat_id, str(result.group(2)), int(result.group(3))))
 							delete_target_message(chat_id, self.sendMessage(chat_id, "*Set flag \"%s\" to \"%d\" success!*"%(str(result.group(2)), int(result.group(3))),
 								parse_mode='Markdown', reply_to_message_id=msg['message_id'])['message_id']).start()
+							return
+
+						result = exceptcommand_match.match(msg['text'])
+						if result:
+							if result.group(1) == 'd':
+								if self.gcache.except_(chat_id, result.group(3), True):
+									sendMessage_and_delete(chat_id, 'Delete except command success')
+								else:
+									sendMessage_and_delete(chat_id, 'Delete except command fail. (Is command in except list? Tips: try using /status to see more)')
+							else:
+								if self.gcache.except_(chat_id, result.group(3)):
+									sendMessage_and_delete(chat_id, 'Add except command success')
+								else:
+									sendMessage_and_delete(chat_id, 'Add except command fail with excpet list too long.')
 							return
 
 						# Match /status command
