@@ -124,7 +124,7 @@ class group_cache_class:
 				return False
 		else:
 			self.g[chat_id]['except'].append(command)
-			if len(b64encode(repr(self.g[chat_id]['execept']))) > 498:
+			if len(b64encode(repr(self.g[chat_id]['except']))) > 498:
 				self.g[chat_id]['except'].remove(command)
 				return False
 			self.g[chat_id]['except'] = list(set(self.g[chat_id]['except']))

@@ -103,7 +103,7 @@ except_command = {}
 
 def sendMessage_and_delete(chat_id, msg, timeout=5, *args, **kwargs):
 	msgid = bot_class.bot_self.sendMessage(chat_id, msg.format(*args), **kwargs)['message_id']
-	delete_target_message(chat_id, msgid, timeout)
+	delete_target_message(chat_id, msgid, timeout).start()
 	del msgid
 
 def gen_status_msg(g):
@@ -188,7 +188,7 @@ class bot_class(telepot_bot):
 
 				if EntryCheck:
 					if get_result['noblue'] and \
-						(result and result.group(1) not in self.gcache.get(chat_id)['except']):
+						(not result or result.group(1) not in self.gcache.get(chat_id)['except']):
 						delete_target_message(chat_id, msg['message_id']).start()
 
 					# Match bot command check
