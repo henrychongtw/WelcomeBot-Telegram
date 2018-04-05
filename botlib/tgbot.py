@@ -102,7 +102,7 @@ except_command = {}
 ''')
 
 def sendMessage_and_delete(chat_id, msg, timeout=5, *args, **kwargs):
-	msgid = bot_class.bot_self.sendMessage(chat_id, msg.format(*args), **kwargs)['message_id']
+	msgid = bot_class.bot_self.sendMessage(chat_id, msg.format(*args), kwargs=kwargs)['message_id']
 	delete_target_message(chat_id, msgid, timeout).start()
 	del msgid
 
