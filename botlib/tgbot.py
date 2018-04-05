@@ -101,7 +101,7 @@ no_new_member = {}
 except_command = {}
 ''')
 
-def sendMessage_and_delete(chat_id, msg, reply_to, timeout=5, *args,):
+def sendMessage_and_delete(chat_id, msg, reply_to, timeout=5, *args):
 	msgid = bot_class.bot_self.sendMessage(chat_id, msg.format(*args), reply_to_message_id=reply_to)['message_id']
 	delete_target_message(chat_id, msgid, timeout).start()
 	del msgid
