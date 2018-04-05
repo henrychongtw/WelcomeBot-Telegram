@@ -129,7 +129,8 @@ class group_cache_class:
 				return False
 			self.g[chat_id]['except'] = list(set(self.g[chat_id]['except']))
 		with MainDatabase() as db:
-			db.execute("UPDATE `welcomemsg` SET `except` = '{}' WHERE `group_id` = {}".format(b64encode(self.g[chat_id]['except']), chat_id))
+			db.execute("UPDATE `welcomemsg` SET `except` = '{}' WHERE `group_id` = {}".format(
+				b64encode(repr(self.g[chat_id]['except'])), chat_id))
 		return True
 
 	def __db_del(self, chat_id):
