@@ -225,6 +225,8 @@ class bot_class(telepot_bot):
 								result = self.pcache.get()
 								if not result:
 									result = b64encode('TBD')
+								self.bot.sendChatAction(chat_id, 'typing')
+								time.sleep(3)
 								self.sendMessage(chat_id, b64decode(result),
 									reply_to_message_id=msg['message_id'])
 								return
@@ -289,6 +291,7 @@ class bot_class(telepot_bot):
 							result.group(3) is `flag value'
 						'''
 						if result:
+							self.bot.sendChatAction(chat_id, 'typing')
 							if str(result.group(2)) not in flag_type:
 								if not get_result['ignore_err']:
 									self.sendMessage(chat_id, "*Error*: Flag \"%s\" not exist"%str(result.group(2)),
