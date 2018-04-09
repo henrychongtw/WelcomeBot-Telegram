@@ -34,7 +34,7 @@ from botlib.poemcache import poem_class
 from libpy.MainDatabase import MainDatabase
 from botlib.groupcache import group_cache_class
 
-command_match = re.compile(r'^\/(clear|setwelcome|ping|reload|poem|setflag|status|d|l|s|except(d|a))(@[a-zA-Z_]*bot)?\s?')
+command_match = re.compile(r'^\/(setwelcome|setflag|s|except(d|a))(@[a-zA-Z_]*bot)?\s?')
 setcommand_match = re.compile(r'^\/setwelcome(@[a-zA-Z_]*bot)?\s((.|\n)*)$')
 gist_match = re.compile(r'^https:\/\/gist.githubusercontent.com\/.+\/[a-z0-9]{32}\/raw\/[a-z0-9]{40}\/.*$')
 clearcommand_match = re.compile(r'^\/clear(@[a-zA-Z_]*bot)?$')
@@ -46,6 +46,7 @@ setflagcommand_match = re.compile(r'^\/setflag(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s(
 setflag2command_match = re.compile(r'^\/s(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
 botcommand_match = re.compile(r'^\/([a-zA-Z]+)(@[a-zA-Z_]+)?$')
 exceptcommand_match = re.compile(r'^\/except(d|a)(@[a-zA-Z_]*bot)?\s(.*)$')
+noparmcommand_match = re.compile(r'^\/(clear|ping|reload|poem|status|d|l)(@[a-zA-Z_]*bot)$')
 
 content_type_concerned = ('new_chat_member')
 group_type = ('group', 'supergroup')
@@ -193,7 +194,7 @@ class bot_class(telepot_bot):
 						delete_target_message(chat_id, msg['message_id']).start()
 
 					# Match bot command check
-					if command_match.match(msg['text']):
+					if command_match.match(msg['text') or noparmcommand_match.match(msg['text']):
 
 						if msg['from']['id'] == Config.bot.owner:
 							result = re.match(r'^\/d( (-?\d+))?$', msg['text'])
