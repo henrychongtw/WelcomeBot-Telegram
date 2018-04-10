@@ -143,7 +143,7 @@ class bot_class(telepot_bot):
 
 		# Added process
 		if content_type == 'new_chat_member' and msg['new_chat_participant']['id'] == self.getid():
-			self.gcache.add((chat_id, None, 0, 1, 0, 0, repr([])))
+			self.gcache.add((chat_id, None, 0, 1, 0, 0, b64encode(repr([]))))
 			with MainDatabase() as db:
 				try:
 					db.execute("INSERT INTO `welcomemsg` (`group_id`) VALUES (%d)"%chat_id)
@@ -201,7 +201,7 @@ class bot_class(telepot_bot):
 							if result:
 								operid = chat_id if result.group(1) is None else result.group(2)
 								self.gcache.delete(operid)
-								self.gcache.add((operid, None, 0, 1, 0, 0, repr([])), not_found=True)
+								self.gcache.add((operid, None, 0, 1, 0, 0, b64encode(repr([]))), not_found=True)
 								delete_target_message(chat_id,
 									self.sendMessage(chat_id, 'Operaction completed!', 
 										reply_to_message_id=msg['message_id'])['message_id']).start()
