@@ -194,7 +194,7 @@ class bot_class(telepot_bot):
 						delete_target_message(chat_id, msg['message_id']).start()
 
 					# Match bot command check
-					if command_match.match(msg['text') or noparmcommand_match.match(msg['text']):
+					if command_match.match(msg['text']) or noparmcommand_match.match(msg['text']):
 
 						if msg['from']['id'] == Config.bot.owner:
 							result = re.match(r'^\/d( (-?\d+))?$', msg['text'])
