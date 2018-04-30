@@ -44,7 +44,7 @@ pingcommand_match = re.compile(r'^\/ping(@[a-zA-Z_]*bot)?$')
 statuscommand_match = re.compile(r'\/status(@[a-zA-Z_]*bot)?$')
 setflagcommand_match = re.compile(r'^\/setflag(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
 setflag2command_match = re.compile(r'^\/s(@[a-zA-Z_]*bot)?\s([a-zA-Z_]+)\s([01])$')
-botcommand_match = re.compile(r'^\/([a-zA-Z]+)(@[a-zA-Z_]+)?$')
+botcommand_match = re.compile(r'^\/([a-zA-Z]+)\s?(@[a-zA-Z_]+)?$')
 exceptcommand_match = re.compile(r'^\/except(d|a)(@[a-zA-Z_]*bot)?\s(.*)$')
 noparmcommand_match = re.compile(r'^\/(clear|ping|reload|poem|status|d|l)(@[a-zA-Z_]*bot)?$')
 
