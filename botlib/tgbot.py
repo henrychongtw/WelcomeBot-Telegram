@@ -69,7 +69,7 @@ def username_splice_and_fix(f):
 		name += ' {}'.format(f['last_name'])
 	name = name if len(name) <= 20 else name[:20]+'...'
 	for x in markdown_symbols:
-		name.replace(x, u'')
+		name.replace(x, u'\\'+x)
 	return name
 
 class delete_target_message(Thread):
