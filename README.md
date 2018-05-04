@@ -95,7 +95,7 @@ git submodule update
 If bot is group admin, other member who not admin or owner using command will receive
 1 minute cold down (need ban user privilege)
 
-# LICENSE
+## LICENSE
 
 [![](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.txt)
    
