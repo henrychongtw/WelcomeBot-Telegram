@@ -68,9 +68,7 @@ def username_splice_and_fix(f):
 	if 'last_name' in f:
 		name += ' {}'.format(f['last_name'])
 	name = name if len(name) <= 20 else name[:20]+'...'
-	for x in markdown_symbols:
-		name.replace(x, u'\\'+x)
-	return name
+	return ''.join(filter(lambda x: x not in markdown_symbols, name))
 
 class delete_target_message(Thread):
 	def __init__(self, chat_id, message_id, time_delay=5):
